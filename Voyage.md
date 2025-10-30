@@ -30,7 +30,7 @@ Joomla! spilled its secrets when we asked nicely:
 curl http://10.10.58.82/api/index.php/v1/config/application?public=true
 ```
 
-Credentials? Oh yes—but shh 🤫 (they’re **[REDACTED]**).
+Credentials? Oh yes-but shh 🤫 (they’re **[REDACTED]**).
 
 ### Boarding the First Ship (SSH)
 Armed with redacted loot, we waltzed in:

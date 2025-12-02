@@ -1,0 +1,114 @@
+# TryHackMe: Sneaky Patch - Complete Walkthrough
+
+## Introduction
+
+The "Sneaky Patch" room challenges you to investigate a Linux system compromised by a kernel-level backdoor. Unlike traditional backdoors that operate in userspace, kernel backdoors have direct access to system resources and can hide from standard detection tools, making them particularly dangerous.​​
+
+## Understanding Kernel Backdoors
+
+Before diving into the challenge, it's essential to understand what makes kernel-level backdoors so stealthy. Traditional backdoors might include SSH keys, bind/reverse shells, or malicious cron jobs. However, kernel backdoors operate at the deepest level of the system through Loadable Kernel Modules (LKMs), giving attackers complete control while remaining nearly invisible to conventional security tools.​​
+
+## Investigation Phase
+
+### Step 1: Gain Root Access
+
+Start by switching to root to perform system-level analysis:
+
+```bash
+sudo su
+```
+
+### Step 2: Check Kernel Logs
+
+Examine kernel messages for suspicious activity:
+
+```bash
+dmesg
+```
+
+The output reveals valuable information about system initialization and loaded modules. Look for unusual messages or module loading events.​
+
+### Step 3: List Loaded Kernel Modules
+
+The most critical step is identifying suspicious kernel modules:
+
+```bash
+lsmod
+```
+
+This command displays all currently loaded kernel modules. Among the legitimate modules, you'll notice spatch - a module that doesn't appear in standard Linux kernel documentation.​
+
+### Step 4: Investigate the Suspicious Module
+
+Gather detailed information about the suspicious module:
+
+```bash
+modinfo spatch
+```
+
+The output reveals:
+
+- Description: "Cipher is always root"
+- Author: "Cipher"
+- Filename: /lib/modules/6.8.0-1016-aws/kernel/drivers/misc/spatch.ko
+
+These indicators strongly suggest malicious intent.​
+
+### Step 5: Analyze the Module Binary
+
+Use strings to extract readable text from the binary:
+
+```bash
+strings /lib/modules/6.8.0-1016-aws/kernel/drivers/misc/spatch.ko
+```
+
+Scroll through the output to find hex-encoded data. You'll discover a message from the attacker:​
+
+```
+[CIPHER BACKDOOR] Here's the secret: 54484d7b73757033725f736e33346b795f643030727d0a
+```
+
+### Step 6: Decode the Flag
+
+The hex string contains the flag. Decode it using:
+
+```bash
+echo "54484d7b73757033725f736e33346b795f643030727d0a" | xxd -r -p
+```
+
+**Flag: THM{sup3r_sn34ky_d00r}**
+
+## Alternative Method: Backdoor Interface
+
+The rootkit creates a proc interface for interaction. You can trigger the backdoor directly:​
+
+```bash
+echo "get_flag" > /proc/cipher_bd
+dmesg | tail -5
+```
+
+This command writes to the backdoor's control interface and retrieves the hex-encoded flag from kernel logs.​
+
+## Key Indicators of Kernel Backdoors
+
+When investigating potential kernel-level compromises, watch for:
+
+- Unfamiliar kernel modules with suspicious names or descriptions
+- Modules from non-standard locations outside typical kernel directories
+- Unusual proc filesystem entries that don't correspond to legitimate processes
+- Kernel log messages with references to unknown authors or suspicious descriptions
+- Modules loaded at unexpected times shown in dmesg output
+
+## Forensic Analysis Techniques
+
+This challenge demonstrates several important forensic techniques:
+
+- Module enumeration using lsmod to identify loaded kernel modules​
+- Binary analysis with strings to extract human-readable data from compiled code
+- Log analysis using dmesg to trace system events and module loading
+- Metadata inspection via modinfo to gather module information
+- Hex decoding to reveal hidden data within binaries
+
+## Conclusion
+
+The Sneaky Patch room provides hands-on experience detecting and analyzing kernel-level backdoors. By systematically investigating loaded modules, examining their metadata, and analyzing binary contents, you successfully identified the malicious kernel module and extracted the hidden flag. These techniques are essential for security analysts investigating advanced persistent threats and rootkit infections in production environments.

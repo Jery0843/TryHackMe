@@ -1,5 +1,5 @@
 # TryHackMe – Advent of Cyber 2025 Day 2
-## Phishing – "Merry Clickmas" (Full, Fresh, Step-by-Step Write-Up)
+## Phishing – "Merry Clickmas" 
 
 **Goal:** Run a phishing page, send a convincing email with SET, harvest creds, then check if those creds are reused on the email portal to find the toys count.
 
